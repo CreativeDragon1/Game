@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+        }
+
+        .game-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .setup-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .setup-section h2 {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .setup-section input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .setup-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .setup-section button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .setup-section button:hover {
+            background: #5568d3;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tile-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            background: white;
+            color: #333;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .input-section input {
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            flex: 1;
+            max-width: 200px;
+            transition: border-color 0.3s;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-section button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .input-section button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .input-section button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .side-panel {
+            width: 250px;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .side-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .side-section h3 {
+            color: #333;
+            font-size: 16px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-entry {
+            padding: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .result-entry strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #667eea;
+        }
+
+        .result-stats {
+            font-size: 12px;
+        }
+
+        .win-message {
+            text-align: center;
+            padding: 20px;
+            background: #6aaa64;
+            color: white;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-section">
+            <div class="setup-section" id="setupSection">
+                <h2>Set Secret Word</h2>
+                <input type="text" id="secretWordInput" placeholder="Enter a 4-7 letter word" maxlength="7">
+                <button onclick="setSecretWord()">Set Word</button>
+            </div>
+
+            <div class="board" id="board" style="display: none;">
+                <div class="tile-row" id="currentGuessRow"></div>
+                <div class="input-section">
+                    <input type="text" id="guessInput" placeholder="Enter your guess">
+                    <button id="submitButton" onclick="submitGuess()">Submit</button>
+                </div>
+                <div id="winMessage" class="win-message hidden"></div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="side-section">
+                <h3>Results</h3>
+                <div class="results" id="resultPanel"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let secretWord = '';
+        let guessCount = 0;
+        let gameWon = false;
+
+        function setSecretWord() {
+            const input = document.getElementById('secretWordInput');
+            const word = input.value.trim().toLowerCase();
+
+            if (word.length < 4 || word.length > 7) {
+                alert('Please enter a word between 4 and 7 letters');
+                return;
+            }
+
+            secretWord = word;
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('board').style.display = 'flex';
+            createInitialRow();
+            document.getElementById('guessInput').focus();
+        }
+
+        function createInitialRow() {
+            const row = document.getElementById('currentGuessRow');
+            row.innerHTML = '';
+            for (let i = 0; i < secretWord.length; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.textContent = '';
+                row.appendChild(tile);
+            }
+        }
+
+        function submitGuess() {
+            if (gameWon) return;
+
+            const input = document.getElementById('guessInput');
+            const guess = input.value.trim().toLowerCase();
+
+            if (guess.length !== secretWord.length) {
+                alert(`Please enter a word with exactly ${secretWord.length} letters`);
+                return;
+            }
+
+            guessCount++;
+            const tiles = document.querySelectorAll('#currentGuessRow .tile');
+            const guessArray = guess.split('');
+
+            let fullRight = 0;
+            let halfRight = 0;
+            const secretArray = secretWord.split('');
+
+            // First pass: mark full right
+            for (let i = 0; i < guessArray.length; i++) {
+                if (guessArray[i] === secretArray[i]) {
+                    fullRight++;
+                    tiles[i].textContent = guessArray[i].toUpperCase();
+                    secretArray[i] = null;
+                    guessArray[i] = null;
+                }
+            }
+
+            // Second pass: mark half right
+            for (let i = 0; i < guessArray.length; i++) {
+                if (guessArray[i] !== null) {
+                    const index = secretArray.indexOf(guessArray[i]);
+                    if (index !== -1) {
+                        halfRight++;
+                        tiles[i].textContent = guessArray[i].toUpperCase();
+                        secretArray[index] = null;
+                    } else {
+                        tiles[i].textContent = guessArray[i].toUpperCase();
+                    }
+                }
+            }
+
+            // Add result to side panel
+            addResultEntry(guessCount, halfRight, fullRight);
+
+            // Check for win
+            if (guess === secretWord) {
+                gameWon = true;
+                document.getElementById('winMessage').textContent = 'Correct! You win!';
+                document.getElementById('winMessage').classList.remove('hidden');
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('submitButton').disabled = true;
+            } else {
+                // Create new row for next guess
+                const newRow = document.createElement('div');
+                newRow.className = 'tile-row';
+                for (let i = 0; i < secretWord.length; i++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.textContent = '';
+                    newRow.appendChild(tile);
+                }
+                document.getElementById('board').insertBefore(newRow, document.querySelector('.input-section'));
+                document.getElementById('currentGuessRow').id = '';
+                newRow.id = 'currentGuessRow';
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        function addResultEntry(guessNumber, halfRight, fullRight) {
+            const resultPanel = document.getElementById('resultPanel');
+            const entry = document.createElement('div');
+            entry.className = 'result-entry';
+            entry.innerHTML = `
+                <strong>Guess ${guessNumber}:</strong>
+                <div class="result-stats">Half right: ${halfRight} | Full right: ${fullRight}</div>
+            `;
+            resultPanel.appendChild(entry);
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('secretWordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') setSecretWord();
+            });
+        });
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('board').style.display !== 'none' && !gameWon) {
+                submitGuess();
+            }
+        });
+    </script>
+</body>
+</html>
