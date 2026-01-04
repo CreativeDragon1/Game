@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wordle Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,23 +13,103 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background: #0f0f23;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* CRT Scanline Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Retro pixel pattern background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(138, 43, 226, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(138, 43, 226, 0.03) 3px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(138, 43, 226, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(138, 43, 226, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
         }
 
         .container {
             display: flex;
             gap: 40px;
-            background: white;
+            background: #1a1a2e;
             padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 8px solid #8a2be2;
+            box-shadow: 
+                0 0 0 4px #0f0f23,
+                0 0 0 8px #5a1f99,
+                0 0 20px rgba(138, 43, 226, 0.5),
+                inset 0 0 20px rgba(138, 43, 226, 0.1);
             max-width: 900px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Arcade cabinet style corners */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #00ff00;
+        }
+
+        .container::before {
+            top: -4px;
+            left: -4px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .container::after {
+            bottom: -4px;
+            right: -4px;
+            border-left: none;
+            border-top: none;
         }
 
         .game-section {
@@ -43,42 +124,75 @@
             flex-direction: column;
             gap: 15px;
             padding: 20px;
-            background: #f5f5f5;
-            border-radius: 10px;
+            background: #000000;
+            border: 4px solid #00ff00;
+            box-shadow: 
+                0 0 0 2px #0f0f23,
+                0 0 0 6px #00aa00,
+                inset 0 0 10px rgba(0, 255, 0, 0.1);
         }
 
         .setup-section h2 {
-            color: #333;
-            font-size: 18px;
+            color: #00ff00;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0 #006600;
+            letter-spacing: 2px;
         }
 
         .setup-section input {
             padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            border: 4px solid #00ff00;
+            background: #000000;
+            color: #00ff00;
+            font-size: 12px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.2);
         }
 
         .setup-section input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #00ff00;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 0, 0.3),
+                0 0 10px rgba(0, 255, 0, 0.5);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff00; }
+            51%, 100% { border-color: #00aa00; }
         }
 
         .setup-section button {
             padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            background: #8a2be2;
+            color: #ffffff;
+            border: 4px solid #5a1f99;
+            font-size: 12px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             cursor: pointer;
-            transition: background 0.3s;
+            box-shadow: 
+                4px 4px 0 #3d1466,
+                0 0 10px rgba(138, 43, 226, 0.5);
+            text-transform: uppercase;
+            position: relative;
+            transition: none;
         }
 
         .setup-section button:hover {
-            background: #5568d3;
+            background: #9d4eed;
+            box-shadow: 
+                4px 4px 0 #3d1466,
+                0 0 20px rgba(138, 43, 226, 0.8);
+            transform: translate(1px, 1px);
+        }
+
+        .setup-section button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 
+                0 0 0 #3d1466,
+                0 0 10px rgba(138, 43, 226, 0.5);
         }
 
         .board {
@@ -96,15 +210,31 @@
         .tile {
             width: 60px;
             height: 60px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            border: 4px solid #00ff00;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            background: white;
-            color: #333;
+            font-size: 20px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background: #000000;
+            color: #00ff00;
+            box-shadow: 
+                inset 2px 2px 0 rgba(0, 255, 0, 0.2),
+                inset -2px -2px 0 rgba(0, 0, 0, 0.5),
+                0 0 5px rgba(0, 255, 0, 0.3);
+            position: relative;
+        }
+
+        /* Pixelated effect for tiles */
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 1px solid rgba(0, 255, 0, 0.1);
+            pointer-events: none;
         }
 
         .input-section {
@@ -115,45 +245,73 @@
 
         .input-section input {
             padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+            border: 4px solid #00ff00;
+            background: #000000;
+            color: #00ff00;
+            font-size: 12px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             flex: 1;
             max-width: 200px;
-            transition: border-color 0.3s;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.2);
         }
 
         .input-section input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #00ff00;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 0, 0.3),
+                0 0 10px rgba(0, 255, 0, 0.5);
         }
 
         .input-section button {
             padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            background: #8a2be2;
+            color: #ffffff;
+            border: 4px solid #5a1f99;
+            font-size: 12px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             cursor: pointer;
-            transition: background 0.3s;
+            box-shadow: 
+                4px 4px 0 #3d1466,
+                0 0 10px rgba(138, 43, 226, 0.5);
+            text-transform: uppercase;
+            transition: none;
         }
 
         .input-section button:hover:not(:disabled) {
-            background: #5568d3;
+            background: #9d4eed;
+            box-shadow: 
+                4px 4px 0 #3d1466,
+                0 0 20px rgba(138, 43, 226, 0.8);
+            transform: translate(1px, 1px);
+        }
+
+        .input-section button:active:not(:disabled) {
+            transform: translate(4px, 4px);
+            box-shadow: 
+                0 0 0 #3d1466,
+                0 0 10px rgba(138, 43, 226, 0.5);
         }
 
         .input-section button:disabled {
-            background: #ccc;
+            background: #333333;
+            border-color: #1a1a1a;
+            color: #666666;
             cursor: not-allowed;
+            box-shadow: 
+                4px 4px 0 #1a1a1a,
+                0 0 5px rgba(0, 0, 0, 0.5);
         }
 
         .side-panel {
             width: 250px;
-            background: #f5f5f5;
+            background: #000000;
             padding: 20px;
-            border-radius: 10px;
+            border: 4px solid #ffd700;
+            box-shadow: 
+                0 0 0 2px #0f0f23,
+                0 0 0 6px #b8960a,
+                inset 0 0 10px rgba(255, 215, 0, 0.1);
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -166,10 +324,13 @@
         }
 
         .side-section h3 {
-            color: #333;
-            font-size: 16px;
-            border-bottom: 2px solid #667eea;
+            color: #ffd700;
+            font-size: 12px;
+            border-bottom: 4px solid #ffd700;
             padding-bottom: 8px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0 #996600;
+            letter-spacing: 2px;
         }
 
         .results {
@@ -182,32 +343,57 @@
 
         .result-entry {
             padding: 8px;
-            background: white;
-            border-left: 4px solid #667eea;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #333;
+            background: #1a1a2e;
+            border: 2px solid #ffd700;
+            font-size: 10px;
+            color: #ffd700;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            box-shadow: inset 0 0 5px rgba(255, 215, 0, 0.1);
         }
 
         .result-entry strong {
             display: block;
             margin-bottom: 4px;
-            color: #667eea;
+            color: #00ff00;
+            text-shadow: 1px 1px 0 #006600;
         }
 
         .result-stats {
-            font-size: 12px;
+            font-size: 9px;
+            letter-spacing: 1px;
         }
 
         .win-message {
             text-align: center;
             padding: 20px;
-            background: #6aaa64;
-            color: white;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
+            background: #00ff00;
+            color: #000000;
+            border: 4px solid #00aa00;
+            font-size: 12px;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
             margin-top: 20px;
+            box-shadow: 
+                0 0 0 2px #000000,
+                0 0 0 6px #006600,
+                0 0 20px rgba(0, 255, 0, 0.8);
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+            animation: victory-pulse 0.5s step-end infinite;
+        }
+
+        @keyframes victory-pulse {
+            0%, 50% { 
+                box-shadow: 
+                    0 0 0 2px #000000,
+                    0 0 0 6px #006600,
+                    0 0 20px rgba(0, 255, 0, 0.8);
+            }
+            51%, 100% { 
+                box-shadow: 
+                    0 0 0 2px #000000,
+                    0 0 0 6px #006600,
+                    0 0 30px rgba(0, 255, 0, 1);
+            }
         }
 
         .hidden {
